@@ -40,20 +40,13 @@ ingredients_list = st.multiselect(
 
 
 
-
 if ingredients_list:
     ingredients_string = ''
     for fruit_chosen in ingredients_list:
         ingredients_string += fruit_chosen + ' '
-        search_on=pd_df.loc[pd_df['FRUIT_NAME'] == fruit_chosen, 'SEARCH_ON'].iloc[0]
-        st.write('The search value for ', fruit_chosen,' is ', search_on, '.')
-        st.subheader(fruit_chosen + ' Nutrition Information')
-        fruityvice_response = requests.get("https://my.smoothiefroot.com/api/fruit/" + fruit_chosen.lower())
-        if fruityvice_response.status_code == 200:
-            st.dataframe(data=fruityvice_response.json(), use_container_width=True)
-        else:
-            st.warning("No nutrition info found for " + fruit_chosen)
+        # nutrition info display here (inside loop)
 
+    # These must be OUTSIDE the for loop, but INSIDE if ingredients_list:
     my_insert_stmt = """ insert into smoothies.public.orders(ingredients, name_on_order)
                          values ('""" + ingredients_string + """', '""" + name_on_order + """')"""
 
@@ -61,8 +54,8 @@ if ingredients_list:
     if time_to_insert:
         session.sql(my_insert_stmt).collect()
         st.success('Your Smoothie is ordered!', icon="✅")
-    time_to_insert = st.button('Submit Order')
-  
+
+
 smoothiefroot_response = requests.get("https://my.smoothiefroot.com/api/fruit/{search_on}") 
 # st.text(smoothiefroot_response)
 sf_df = st.dataframe(data=smoothiefroot_response.json(), use_container_width=True)
